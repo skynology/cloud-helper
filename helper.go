@@ -4,15 +4,22 @@ import (
 	"time"
 
 	"github.com/skynology/cloud-types"
+	"github.com/skynology/go-sdk"
 )
 
+// 用于云代码中调用其他函数
+type FuncHandler interface {
+	Call(h *Helper, req types.CloudRequest, app *skynology.App, name string, data map[string]interface{}) (result map[string]interface{}, err error)
+}
+
 // 创建新Helper
-func NewHelper() *Helper {
+func NewHelper(handler FuncHandler) *Helper {
 	return &Helper{
 		HideFields:    []string{},
 		ProtectFields: []string{},
 		Logs:          []types.CloudLog{},
 		Data:          make(map[string]interface{}),
+		funcHandler:   handler,
 	}
 }
 
@@ -26,6 +33,13 @@ type Helper struct {
 	Data          map[string]interface{}
 	Logs          []types.CloudLog
 	Errors        types.CloudError
+	funcHandler   FuncHandler
+}
+
+// 云代码中调用函数
+func (h *Helper) Call(req types.CloudRequest, app *skynology.App, name string, data map[string]interface{}) (result map[string]interface{}, err error) {
+	result, err = h.funcHandler.Call(h, req, app, name, data)
+	return
 }
 
 // 完成并退出
