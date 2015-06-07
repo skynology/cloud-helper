@@ -9,6 +9,7 @@ import (
 
 // 用于云代码中调用其他函数
 type FuncHandler interface {
+	// 调用内部方法
 	Call(h *Helper, req types.CloudRequest, app *skynology.App, name string, data map[string]interface{}) (result map[string]interface{}, err error)
 }
 
